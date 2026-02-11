@@ -1,0 +1,63 @@
+# 应用基础配置
+app:
+  name: "app" # 应用名称
+  env: "dev" # 应用环境 dev|test|prod
+
+# HTTP 服务配置
+http_server:
+  addr: ":8888"
+  log:
+    # 仅在本地开发调试时打开
+    # access_filename: "/dev/stdout"
+    # error_filename: "/dev/stderr"
+
+# 业务私有配置
+biz:
+
+# 应用业务日志配置
+log:
+  level: 4 # 日志级别 0: panic 1: fatal 2: error 3: warn 4: info 5: debug 6: trace
+  # 仅在本地开发调试时打开
+  # filename: "/dev/stdout"
+
+# HTTP Client 配置
+resty:
+  timeout: "5s"
+
+# 跨域中间件配�?
+mid_cors:
+  allow_origins: [
+      # 本地/测试等环境配�?正式环境须去�?
+      "*",
+      "https://test.*.com",
+
+      # 生产环境配置
+      "https://prod.*.com",
+    ]
+
+# 数据库配�?
+db:
+  host: "127.0.0.1"
+  port: 3306
+  username: "root"
+  password: "Ljw030710"
+  database: "biaobai"
+
+# # Redis 配置 开启前请在 register/boot.go 中进�?nedis.Boot()
+# redis:
+#   addrs:
+#     - "127.0.0.1:6379"
+#   db: 0
+#   password: "jh_pass"
+
+# 飞书告警配置
+feishu:
+  enable: false
+  notice_webhook: ""
+  notice_secret: ""
+#七牛云配�?
+qiniu:
+  access_key: "7Esv5lWwgMhEoCUnuJbCY-oDTnijXgRzll5oNCZh"
+  secret_key: "QdLH0zgtZyMt8bCxSPdFXT4zLtwYEiJkTZLjv4Fa"
+  bucket: "repoaa"
+  domain: "http://ta4qfny94.hd-bkt.clouddn.com/"
