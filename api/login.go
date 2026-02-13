@@ -22,7 +22,7 @@ func LoginHandler() gin.HandlerFunc {
 }
 
 type LoginApi struct {
-	Info     struct{}        `name:"API名称" desc:"API描述"`
+	Info     struct{}        `name:"用户登录" desc:"用户名和密码登录"`
 	Request  LoginApiRequest  // API请求参数 (Uri/Header/Query/Body)
 	Response LoginApiResponse // API响应数据 (Body中的Data部分)
 }
