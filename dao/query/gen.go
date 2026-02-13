@@ -16,16 +16,18 @@ import (
 )
 
 var (
-	Q          = new(Query)
-	Confession *confession
-	FileRecord *fileRecord
-	User       *user
-	UserBlock  *userBlock
+	Q                 = new(Query)
+	Confession        *confession
+	ConfessionComment *confessionComment
+	FileRecord        *fileRecord
+	User              *user
+	UserBlock         *userBlock
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Confession = &Q.Confession
+	ConfessionComment = &Q.ConfessionComment
 	FileRecord = &Q.FileRecord
 	User = &Q.User
 	UserBlock = &Q.UserBlock
@@ -33,32 +35,35 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:         db,
-		Confession: newConfession(db, opts...),
-		FileRecord: newFileRecord(db, opts...),
-		User:       newUser(db, opts...),
-		UserBlock:  newUserBlock(db, opts...),
+		db:                db,
+		Confession:        newConfession(db, opts...),
+		ConfessionComment: newConfessionComment(db, opts...),
+		FileRecord:        newFileRecord(db, opts...),
+		User:              newUser(db, opts...),
+		UserBlock:         newUserBlock(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Confession confession
-	FileRecord fileRecord
-	User       user
-	UserBlock  userBlock
+	Confession        confession
+	ConfessionComment confessionComment
+	FileRecord        fileRecord
+	User              user
+	UserBlock         userBlock
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Confession: q.Confession.clone(db),
-		FileRecord: q.FileRecord.clone(db),
-		User:       q.User.clone(db),
-		UserBlock:  q.UserBlock.clone(db),
+		db:                db,
+		Confession:        q.Confession.clone(db),
+		ConfessionComment: q.ConfessionComment.clone(db),
+		FileRecord:        q.FileRecord.clone(db),
+		User:              q.User.clone(db),
+		UserBlock:         q.UserBlock.clone(db),
 	}
 }
 
@@ -72,27 +77,30 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Confession: q.Confession.replaceDB(db),
-		FileRecord: q.FileRecord.replaceDB(db),
-		User:       q.User.replaceDB(db),
-		UserBlock:  q.UserBlock.replaceDB(db),
+		db:                db,
+		Confession:        q.Confession.replaceDB(db),
+		ConfessionComment: q.ConfessionComment.replaceDB(db),
+		FileRecord:        q.FileRecord.replaceDB(db),
+		User:              q.User.replaceDB(db),
+		UserBlock:         q.UserBlock.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Confession IConfessionDo
-	FileRecord IFileRecordDo
-	User       IUserDo
-	UserBlock  IUserBlockDo
+	Confession        IConfessionDo
+	ConfessionComment IConfessionCommentDo
+	FileRecord        IFileRecordDo
+	User              IUserDo
+	UserBlock         IUserBlockDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Confession: q.Confession.WithContext(ctx),
-		FileRecord: q.FileRecord.WithContext(ctx),
-		User:       q.User.WithContext(ctx),
-		UserBlock:  q.UserBlock.WithContext(ctx),
+		Confession:        q.Confession.WithContext(ctx),
+		ConfessionComment: q.ConfessionComment.WithContext(ctx),
+		FileRecord:        q.FileRecord.WithContext(ctx),
+		User:              q.User.WithContext(ctx),
+		UserBlock:         q.UserBlock.WithContext(ctx),
 	}
 }
 

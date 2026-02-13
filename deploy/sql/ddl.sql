@@ -47,3 +47,18 @@ CREATE TABLE `user_blocks` (
   KEY `idx_blocked_id` (`blocked_id`),
   CONSTRAINT `chk_not_self_block` CHECK (`blocker_id` <> `blocked_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户拉黑关系表';
+
+CREATE TABLE `confession_comments` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+  `confession_id` BIGINT UNSIGNED NOT NULL COMMENT '表白ID',
+  `username` VARCHAR(20) NOT NULL COMMENT '评论用户名',
+  `content` VARCHAR(500) NOT NULL COMMENT '评论内容',
+  `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `updated_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at` BIGINT NOT NULL DEFAULT 0 COMMENT '删除时间 (软删除)',
+  PRIMARY KEY (`id`),
+  KEY `idx_confession_id` (`confession_id`),
+  KEY `idx_username` (`username`),
+  CONSTRAINT `fk_comment_confession_id` FOREIGN KEY (`confession_id`) REFERENCES `confessions` (`id`),
+  CONSTRAINT `fk_comment_username` FOREIGN KEY (`username`) REFERENCES `user` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='表白评论表';

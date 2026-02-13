@@ -16,6 +16,7 @@ var tables = []string{
 	"confessions",
 	"file_records",
 	"user_blocks",
+	"confession_comments",
 }
 
 func main() {
