@@ -19,14 +19,14 @@ func Route(router *gin.Engine) {
 		routeBase(r, router)
 
 		// 注册业务逻辑接口
-		r.POST("/login",api.LoginHandler())//注册登录接口
-		r.POST("/register",api.RegisterHandler())
-		r.POST("/update_password",api.UpdatepasswordHandler())
-		r.POST("/update_nickname",api.UpdatenicknameHandler())
-		r.POST("/upload",api.UploadHandler())
-		r.POST("/createconfession",api.CreateconfessionHandler())
-		r.POST("/updateconfession",api.UpdateconfessionHandler())
-		r.POST("/deleteconfession",api.DeleteconfessionHandler())
+		r.POST("/user/login",api.LoginHandler())//注册登录接口
+		r.POST("/user/register",api.RegisterHandler())
+		r.POST("/user/update_password",api.UpdatepasswordHandler())
+		r.POST("/user/update_nickname",api.UpdatenicknameHandler())
+		r.POST("/confession/upload",api.UploadHandler())
+		r.POST("/confession/createconfession",api.CreateconfessionHandler())
+		r.POST("/confession/updateconfession",api.UpdateconfessionHandler())
+		r.POST("/confession/deleteconfession",api.DeleteconfessionHandler())
 		r.POST("/block/user", api.BlockuserHandler())
 		r.POST("/unblock/user", api.UnblockuserHandler())
 		r.POST("/block/check", api.CheckblockHandler())
