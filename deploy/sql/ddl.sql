@@ -62,3 +62,9 @@ CREATE TABLE `confession_comments` (
   CONSTRAINT `fk_comment_confession_id` FOREIGN KEY (`confession_id`) REFERENCES `confessions` (`id`),
   CONSTRAINT `fk_comment_username` FOREIGN KEY (`username`) REFERENCES `user` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='表白评论表';
+
+ALTER TABLE `confession_comments`
+  ADD COLUMN `parent_comment_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '父评论ID，0表示一级评论' AFTER `confession_id`,
+  ADD COLUMN `reply_to_username` VARCHAR(20) NOT NULL DEFAULT '' COMMENT '被回复用户名' AFTER `username`,
+  ADD KEY `idx_parent_comment_id` (`parent_comment_id`),
+  ADD KEY `idx_reply_to_username` (`reply_to_username`);

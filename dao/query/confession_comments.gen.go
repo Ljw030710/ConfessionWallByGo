@@ -29,7 +29,9 @@ func newConfessionComment(db *gorm.DB, opts ...gen.DOOption) confessionComment {
 	_confessionComment.ALL = field.NewAsterisk(tableName)
 	_confessionComment.ID = field.NewInt64(tableName, "id")
 	_confessionComment.ConfessionID = field.NewInt64(tableName, "confession_id")
+	_confessionComment.ParentCommentID = field.NewInt64(tableName, "parent_comment_id")
 	_confessionComment.Username = field.NewString(tableName, "username")
+	_confessionComment.ReplyToUsername = field.NewString(tableName, "reply_to_username")
 	_confessionComment.Content = field.NewString(tableName, "content")
 	_confessionComment.CreatedAt = field.NewTime(tableName, "created_at")
 	_confessionComment.UpdatedAt = field.NewTime(tableName, "updated_at")
@@ -44,14 +46,16 @@ func newConfessionComment(db *gorm.DB, opts ...gen.DOOption) confessionComment {
 type confessionComment struct {
 	confessionCommentDo confessionCommentDo
 
-	ALL          field.Asterisk
-	ID           field.Int64  // 自增ID
-	ConfessionID field.Int64  // 表白ID
-	Username     field.String // 评论用户名
-	Content      field.String // 评论内容
-	CreatedAt    field.Time   // 创建时间
-	UpdatedAt    field.Time   // 更新时间
-	DeletedAt    field.Field  // 删除时间 (软删除)
+	ALL             field.Asterisk
+	ID              field.Int64  // 自增ID
+	ConfessionID    field.Int64  // 表白ID
+	ParentCommentID field.Int64  // 父评论ID，0表示一级评论
+	Username        field.String // 评论用户名
+	ReplyToUsername field.String // 被回复用户名
+	Content         field.String // 评论内容
+	CreatedAt       field.Time   // 创建时间
+	UpdatedAt       field.Time   // 更新时间
+	DeletedAt       field.Field  // 删除时间 (软删除)
 
 	fieldMap map[string]field.Expr
 }
@@ -70,7 +74,9 @@ func (c *confessionComment) updateTableName(table string) *confessionComment {
 	c.ALL = field.NewAsterisk(table)
 	c.ID = field.NewInt64(table, "id")
 	c.ConfessionID = field.NewInt64(table, "confession_id")
+	c.ParentCommentID = field.NewInt64(table, "parent_comment_id")
 	c.Username = field.NewString(table, "username")
+	c.ReplyToUsername = field.NewString(table, "reply_to_username")
 	c.Content = field.NewString(table, "content")
 	c.CreatedAt = field.NewTime(table, "created_at")
 	c.UpdatedAt = field.NewTime(table, "updated_at")
@@ -103,10 +109,12 @@ func (c *confessionComment) GetFieldByName(fieldName string) (field.OrderExpr, b
 }
 
 func (c *confessionComment) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 7)
+	c.fieldMap = make(map[string]field.Expr, 9)
 	c.fieldMap["id"] = c.ID
 	c.fieldMap["confession_id"] = c.ConfessionID
+	c.fieldMap["parent_comment_id"] = c.ParentCommentID
 	c.fieldMap["username"] = c.Username
+	c.fieldMap["reply_to_username"] = c.ReplyToUsername
 	c.fieldMap["content"] = c.Content
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt

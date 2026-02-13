@@ -31,6 +31,7 @@ func Route(router *gin.Engine) {
 		r.POST("/unblock/user", api.UnblockuserHandler())
 		r.POST("/block/check", api.CheckblockHandler())
 		r.POST("/comment/createcomment",api.CreatecommentHandler())
+		r.POST("/comment/replycomment",api.ReplycommentHandler())
 	}
 }
 
