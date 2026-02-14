@@ -34,4 +34,6 @@ var (
 	CodeUploadError      = kit.NewCode(30003, "文件上传失败")
 	CodeFileTooLarge     = kit.NewCode(30004, "文件体积过大")
 	CodeFileTypeInvalid  = kit.NewCode(30005, "不支持的文件格式")
+	CodeServerBusy       = kit.NewCode(30006, "服务器繁忙，请稍后再试") 
+    CodePasswordEncryptError = kit.NewCode(30007, "密码处理异常")
 )

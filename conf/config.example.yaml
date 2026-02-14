@@ -24,10 +24,10 @@ log:
 resty:
   timeout: "5s"
 
-# 跨域中间件配�?
+# 跨域中间件配�?
 mid_cors:
   allow_origins: [
-      # 本地/测试等环境配�?正式环境须去�?
+      # 本地/测试等环境配�?正式环境须去�?
       "*",
       "https://test.*.com",
 
@@ -35,7 +35,7 @@ mid_cors:
       "https://prod.*.com",
     ]
 
-# 数据库配�?
+# 数据库配�?
 db:
   host: "127.0.0.1"
   port: 3306
@@ -43,7 +43,7 @@ db:
   password: "Ljw030710"
   database: "biaobai"
 
-# # Redis 配置 开启前请在 register/boot.go 中进�?nedis.Boot()
+# # Redis 配置 开启前请在 register/boot.go 中进�?nedis.Boot()
 # redis:
 #   addrs:
 #     - "127.0.0.1:6379"
@@ -55,9 +55,13 @@ feishu:
   enable: false
   notice_webhook: ""
   notice_secret: ""
-#七牛云配�?
+#七牛云配�?
 qiniu:
   access_key: "7Esv5lWwgMhEoCUnuJbCY-oDTnijXgRzll5oNCZh"
   secret_key: "QdLH0zgtZyMt8bCxSPdFXT4zLtwYEiJkTZLjv4Fa"
   bucket: "repoaa"
   domain: "http://ta4qfny94.hd-bkt.clouddn.com/"
+
+jwt:
+  secret: "secret" # 密钥
+  expiration: "24h" # 过期时间（默认30天）

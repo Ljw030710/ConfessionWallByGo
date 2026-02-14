@@ -9,6 +9,7 @@ import (
 	"github.com/zjutjh/mygo/kit"
 	"github.com/zjutjh/mygo/nlog"
 	"github.com/zjutjh/mygo/swagger"
+	"golang.org/x/crypto/bcrypt"
 
 	"app/comm"
 	"app/dao/repo"
@@ -49,25 +50,22 @@ func (r *RegisterApi) Run(ctx *gin.Context) kit.Code {
 	// 1. 初始化 Repo
 	userRepo := repo.NewUserRepo()
 
-	// 2. 检查用户名是否已经存在
-	exists, err := userRepo.FindByUsername(ctx, r.Request.Body.Username)
+	// 2) 使用 bcrypt 对明文密码做单向哈希
+	// 注意：哈希后不可逆，登录时用 CompareHashAndPassword 校验
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(r.Request.Body.Password), bcrypt.DefaultCost)
 	if err != nil {
-		nlog.Pick().WithContext(ctx).WithError(err).Error("查询用户失败")
-		return comm.CodeDatabaseError
-	}
-	if exists != nil {
-		// 用户名已存在，返回数据冲突错误码
-		return comm.CodeDataConflict
+		nlog.Pick().WithContext(ctx).WithError(err).Error("密码加密失败")
+		return comm.CodePasswordEncryptError
 	}
 
-	// 3. 执行注册逻辑 (直接存储明文)
-	newUser, err := userRepo.Create(ctx, r.Request.Body.Username, r.Request.Body.Password, r.Request.Body.Nickname)
+	// 3) 入库时只保存哈希后的密码，绝不保存明文
+	newUser, err := userRepo.Create(ctx, r.Request.Body.Username, string(hashedPassword), r.Request.Body.Nickname)
 	if err != nil {
 		nlog.Pick().WithContext(ctx).WithError(err).Error("创建用户失败")
 		return comm.CodeDatabaseError
 	}
 
-	// 4. 将新用户的 ID 赋值给 Response 变量
+	// 4) 返回新用户ID
 	r.Response.ID = newUser.ID
 	return comm.CodeOK
 }
