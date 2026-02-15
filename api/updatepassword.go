@@ -1,14 +1,17 @@
 package api
 
 import (
+	"errors"
 	"reflect"
 	"runtime"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zjutjh/mygo/foundation/reply"
+	midjwt "github.com/zjutjh/mygo/jwt"
 	"github.com/zjutjh/mygo/kit"
 	"github.com/zjutjh/mygo/nlog"
 	"github.com/zjutjh/mygo/swagger"
+	"golang.org/x/crypto/bcrypt"
 
 	"app/comm"
 	"app/dao/repo"
@@ -32,8 +35,8 @@ type UpdatepasswordApiRequest struct {
 	Header struct {}
 	Query struct {}
 	Body struct {
-		UserID      int64  `json:"user_id" label:"用户ID"`
-		Username    string `json:"username" label:"用户名"`
+		UserID      int64  `json:"user_id" binding:"required" label:"用户ID"`
+		OldPassword string `json:"old_password" binding:"required" label:"旧密码"`
 		NewPassword string `json:"new_password" binding:"required" label:"新密码"`
 	}
 }
@@ -43,26 +46,37 @@ type UpdatepasswordApiResponse struct {}
 // Run Api业务逻辑执行点
 func (u *UpdatepasswordApi) Run(ctx *gin.Context) kit.Code {
 userRepo := repo.NewUserRepo()
-	var err error
 
-	// 1. 优先通过 UserID 修改
-	if u.Request.Body.UserID > 0 {
-		err = userRepo.UpdatePasswordByID(ctx, u.Request.Body.UserID, u.Request.Body.NewPassword)
-	} else if u.Request.Body.Username != "" {
-		// 2. 其次通过 Username 修改
-		// 先查一下用户在不在
-		user, _ := userRepo.FindByUsername(ctx, u.Request.Body.Username)
-		if user == nil {
-			return comm.CodeDataNotFound
-		}
-		err = userRepo.UpdatePasswordByUsername(ctx, u.Request.Body.Username, u.Request.Body.NewPassword)
-	} else {
-		return comm.CodeParameterInvalid
+	// 1) 按 user_id 定位用户
+	user, err := userRepo.FindById(ctx, u.Request.Body.UserID)
+	if err != nil {
+		nlog.Pick().WithContext(ctx).WithError(err).Error("查询用户失败")
+		return comm.CodeDatabaseError
+	}
+	if user == nil {
+		return comm.CodeDataNotFound
 	}
 
-	// 3. 处理数据库错误
+	// 2) 校验旧密码
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(u.Request.Body.OldPassword))
 	if err != nil {
-		nlog.Pick().WithContext(ctx).WithError(err).Error("数据库更新失败")
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return comm.CodeAuthFailed
+		}
+		nlog.Pick().WithContext(ctx).WithError(err).Error("旧密码校验异常")
+		return comm.CodePasswordEncryptError
+	}
+
+	// 3) 新密码加密后更新
+	newHash, err := bcrypt.GenerateFromPassword([]byte(u.Request.Body.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		nlog.Pick().WithContext(ctx).WithError(err).Error("新密码加密失败")
+		return comm.CodePasswordEncryptError
+	}
+
+	err = userRepo.UpdatePasswordByID(ctx, u.Request.Body.UserID, string(newHash))
+	if err != nil {
+		nlog.Pick().WithContext(ctx).WithError(err).Error("更新密码失败")
 		return comm.CodeDatabaseError
 	}
 

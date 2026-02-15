@@ -1,14 +1,16 @@
 package api
 
 import (
+	"errors"
 	"reflect"
 	"runtime"
-
+	midjwt "github.com/zjutjh/mygo/jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/zjutjh/mygo/foundation/reply"
 	"github.com/zjutjh/mygo/kit"
 	"github.com/zjutjh/mygo/nlog"
 	"github.com/zjutjh/mygo/swagger"
+	"golang.org/x/crypto/bcrypt"
 
 	"app/comm"
 	"app/dao/repo"
@@ -38,30 +40,43 @@ type LoginApiRequest struct {
 }
 
 type LoginApiResponse struct {
-	ID int64 `json:"id" desc:"用户ID"`
+	ID       int64  `json:"id" desc:"用户ID"`
 	Username string `json:"username" desc:"用户名"`
 	Nickname string `json:"nickname" desc:"昵称"`
+	Token    string `json:"token" desc:"JWT Token"`
 }
 
 // Run Api业务逻辑执行点
 func (l *LoginApi) Run(ctx *gin.Context) kit.Code {
-	// TODO: 在此处编写接口业务逻辑
-	//1、初始化
+	//根据用户名查询用户
 	userRepo := repo.NewUserRepo()
-	//2、执行登录逻辑
-	user,err := userRepo.Login(ctx,l.Request.Body.Username,l.Request.Body.Password)
+	user,err := userRepo.FindByUsername(ctx,l.Request.Body.Username)
 	if err != nil{
-		nlog.Pick().WithContext(ctx).WithError(err).Warn("登录验证失败")
-		if err.Error() == "用户名或密码错误"{
-			return comm.CodeAuthFailed
-		}
+		nlog.Pick().WithContext(ctx).WithError(err).Error("用户查询失败")
 		return comm.CodeDatabaseError
 	}
-
-	//3、填充响应数据
+	if user == nil{
+		return comm.CodeAuthFailed
+	}
+	//进行密码校验
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password),[]byte(l.Request.Body.Password))
+	if err != nil{
+		if errors.Is(err,bcrypt.ErrMismatchedHashAndPassword){
+			return comm.CodeAuthFailed
+		}
+		nlog.Pick().WithContext(ctx).WithError(err).Error("密码校验异常")
+		return comm.CodeAuthFailed
+	}
+	//密码正确发JWT
+	token,err := midjwt.Pick[int64]().GenerateToken(user.ID)
+	if err != nil{
+		nlog.Pick().WithContext(ctx).WithError(err).Error("生成JWT失败")
+		return comm.CodeMiddlewareServiceError
+	}
 	l.Response.ID = user.ID
-	l.Response.Username  =user.Username
+	l.Response.Username = user.Username
 	l.Response.Nickname = user.Nickname
+	l.Response.Token = token
 	return comm.CodeOK
 }
 

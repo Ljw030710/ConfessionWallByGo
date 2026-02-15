@@ -50,15 +50,14 @@ func (r *RegisterApi) Run(ctx *gin.Context) kit.Code {
 	// 1. 初始化 Repo
 	userRepo := repo.NewUserRepo()
 
-	// 2) 使用 bcrypt 对明文密码做单向哈希
-	// 注意：哈希后不可逆，登录时用 CompareHashAndPassword 校验
+	// 2. 使用 bcrypt 对明文密码做单向哈希
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(r.Request.Body.Password), bcrypt.DefaultCost)
 	if err != nil {
 		nlog.Pick().WithContext(ctx).WithError(err).Error("密码加密失败")
 		return comm.CodePasswordEncryptError
 	}
 
-	// 3) 入库时只保存哈希后的密码，绝不保存明文
+	// 3) 入库
 	newUser, err := userRepo.Create(ctx, r.Request.Body.Username, string(hashedPassword), r.Request.Body.Nickname)
 	if err != nil {
 		nlog.Pick().WithContext(ctx).WithError(err).Error("创建用户失败")

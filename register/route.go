@@ -7,7 +7,7 @@ import (
 	"github.com/zjutjh/mygo/config"
 	"github.com/zjutjh/mygo/middleware/cors"
 	"github.com/zjutjh/mygo/swagger"
-
+	midjwt "github.com/zjutjh/mygo/jwt/middleware"
 	"app/api"
 )
 
@@ -17,21 +17,21 @@ func Route(router *gin.Engine) {
 	r := router.Group(routePrefix())
 	{
 		routeBase(r, router)
-
+		auth := midjwt.Auth[int64](true)
 		// 注册业务逻辑接口
 		r.POST("/user/login",api.LoginHandler())//注册登录接口
 		r.POST("/user/register",api.RegisterHandler())
-		r.POST("/user/update_password",api.UpdatepasswordHandler())
-		r.POST("/user/update_nickname",api.UpdatenicknameHandler())
-		r.POST("/confession/upload",api.UploadHandler())
-		r.POST("/confession/createconfession",api.CreateconfessionHandler())
-		r.POST("/confession/updateconfession",api.UpdateconfessionHandler())
-		r.POST("/confession/deleteconfession",api.DeleteconfessionHandler())
-		r.POST("/block/user", api.BlockuserHandler())
-		r.POST("/unblock/user", api.UnblockuserHandler())
-		r.POST("/block/check", api.CheckblockHandler())
-		r.POST("/comment/createcomment",api.CreatecommentHandler())
-		r.POST("/comment/replycomment",api.ReplycommentHandler())
+		r.POST("/user/update_password", auth, api.UpdatepasswordHandler())
+		r.POST("/user/update_nickname", auth, api.UpdatenicknameHandler())
+		r.POST("/confession/upload", auth, api.UploadHandler())
+		r.POST("/confession/createconfession", auth, api.CreateconfessionHandler())
+		r.POST("/confession/updateconfession", auth, api.UpdateconfessionHandler())
+		r.POST("/confession/deleteconfession", auth, api.DeleteconfessionHandler())
+		r.POST("/block/user", auth, api.BlockuserHandler())
+		r.POST("/unblock/user", auth, api.UnblockuserHandler())
+		r.POST("/block/check", auth, api.CheckblockHandler())
+		r.POST("/comment/createcomment", auth, api.CreatecommentHandler())
+		r.POST("/comment/replycomment", auth, api.ReplycommentHandler())
 	}
 }
 

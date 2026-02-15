@@ -10,7 +10,7 @@ import (
 	"github.com/zjutjh/mygo/ndb"
 	"github.com/zjutjh/mygo/nesty"
 	"github.com/zjutjh/mygo/nlog"
-
+	midjwt "github.com/zjutjh/mygo/jwt"
 	"app/comm"
 	"app/register/generate"
 )
@@ -20,6 +20,9 @@ func Boot() kernel.BootList {
 		// 基础引导器
 		feishu.Boot(),   // 飞书Bot (消息提醒)
 		nlog.Boot(),     // 业务日志
+
+		//添加JWT
+		midjwt.Boot[int64](),
 		generate.Boot(), // 导入生成代码
 
 		// Client引导器
